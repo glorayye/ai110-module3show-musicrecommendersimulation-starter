@@ -131,6 +131,7 @@ Building this system made it clear that a recommender is only as good as its ass
 ### intense profile (default)
 ![top 3 recs](image.png)
 ![remaining 2 recs](image-1.png)
+![tablular display](image-7.png)
 
 ### other profiles
 ![chill](image-2.png)

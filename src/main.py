@@ -10,6 +10,7 @@ You will implement the functions in recommender.py:
 """
 
 import os
+from tabulate import tabulate
 from recommender import load_songs, recommend_songs
 
 CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "songs.csv")
@@ -101,7 +102,7 @@ PROFILES = {
 }
 
 # Swap the key below to test a different profile
-ACTIVE_PROFILE = "extremes"
+ACTIVE_PROFILE = "intense"
 
 
 def main() -> None:
@@ -113,17 +114,20 @@ def main() -> None:
 
     recommendations = recommend_songs(user_prefs, songs, k=5)
 
-    print("\n" + "=" * 50)
-    print(f"  Top {len(recommendations)} Recommendations")
-    print("=" * 50)
+    # Summary table
+    table_rows = [
+        [f"#{i}", song["title"], song["artist"], song["genre"], song["mood"], f"{score:.2f} / 6.50"]
+        for i, (song, score, _) in enumerate(recommendations, start=1)
+    ]
+    print(f"\n  Top {len(recommendations)} Recommendations — profile: {ACTIVE_PROFILE}\n")
+    print(tabulate(table_rows, headers=["#", "Title", "Artist", "Genre", "Mood", "Score"], tablefmt="outline"))
+
+    # Reasons detail
+    print()
     for i, (song, score, explanation) in enumerate(recommendations, start=1):
-        print(f"\n#{i}  {song['title']}  —  {song['artist']}")
-        print(f"    Genre: {song['genre']}  |  Mood: {song['mood']}")
-        print(f"    Score: {score:.2f} / 6.50")
-        print("    Why:")
-        for line in explanation.split("\n"):
-            print(f"      {line.strip()}")
-    print("\n" + "=" * 50)
+        reasons_table = [[r.strip()] for r in explanation.split("\n") if r.strip()]
+        print(tabulate(reasons_table, headers=[f"#{i}  {song['title']}  ({score:.2f} pts)"], tablefmt="simple"))
+        print()
 
 
 if __name__ == "__main__":
