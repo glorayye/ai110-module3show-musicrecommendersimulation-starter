@@ -52,16 +52,16 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
 
     # --- Categorical matches (binary: match or no match) ---
     if song["genre"] == user_prefs.get("favorite_genre"):
-        score += 2.0
-        reasons.append(f"genre match: {song['genre']} (+2.0)")
+        score += 1.0                  # reduced from 2.0 — genre is a hint, not a hard gate
+        reasons.append(f"genre match: {song['genre']} (+1.0)")
 
     if song["mood"] == user_prefs.get("favorite_mood"):
         score += 1.5
         reasons.append(f"mood match: {song['mood']} (+1.5)")
 
     # --- Numeric closeness scores (1 - |song_value - target|) × weight ---
-    energy_score = (1 - abs(song["energy"] - user_prefs.get("target_energy", 0.5))) * 1.0
-    score += energy_score
+    energy_score = (1 - abs(song["energy"] - user_prefs.get("target_energy", 0.5))) * 2.0
+    score += energy_score             # doubled from 1.0 — energy is the strongest audio signal
     reasons.append(f"energy closeness: {song['energy']} vs {user_prefs.get('target_energy', 0.5)} (+{energy_score:.2f})")
 
     valence_score = (1 - abs(song["valence"] - user_prefs.get("target_valence", 0.5))) * 0.75
@@ -79,6 +79,12 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     danceability_score = (1 - abs(song["danceability"] - user_prefs.get("target_danceability", 0.5))) * 0.25
     score += danceability_score
     reasons.append(f"danceability closeness: {song['danceability']} vs {user_prefs.get('target_danceability', 0.5)} (+{danceability_score:.2f})")
+
+    # --- Acoustic mismatch penalty ---
+    # Only fires when user explicitly wants acoustic AND song is non-acoustic
+    if user_prefs.get("likes_acoustic") and song["acousticness"] < 0.3:
+        score -= 1.0
+        reasons.append(f"acoustic mismatch penalty: {song['acousticness']} (-1.0)")
 
     return round(score, 3), reasons
 
