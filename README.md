@@ -17,17 +17,47 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world recommenders like Spotify and YouTube combine two strategies: collaborative filtering, which surfaces songs that users with similar taste enjoyed, and content-based filtering, which matches songs based on their audio attributes like energy, mood, and tempo. At scale, these systems layer in contextual signals (time of day, device, recent skips) and use machine learning to continuously re-weight what matters most for each user. This version prioritizes content-based filtering — it scores each song by comparing its attributes to a user's stated preferences, rewards closeness rather than magnitude, and ranks the full catalog to return the best matches. The goal is transparency: every recommendation can be traced back to a specific feature comparison, making it easy to understand why a song was suggested and where the system falls short.
 
-Some prompts to answer:
+### Song Features
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+Each `Song` stores: `id`, `title`, `artist`, `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, `acousticness`.
 
-You can include a simple diagram or bullet list if helpful.
+### User Profile Fields
+
+Each `UserProfile` stores: `favorite_genre`, `favorite_mood`, `target_energy`, `target_valence`, `target_tempo_bpm`, `target_danceability`, `target_acousticness`, `likes_acoustic`.
+
+### Algorithm Recipe
+
+Every song in the catalog is scored against the user profile using these rules:
+
+| Rule | Points |
+|---|---|
+| Genre exact match | +2.0 |
+| Mood exact match | +1.5 |
+| Energy closeness: `1 − │song − target│ × 1.0` | 0.0 – 1.00 |
+| Valence closeness `× 0.75` | 0.0 – 0.75 |
+| Tempo closeness (normalized ÷ 200) `× 0.50` | 0.0 – 0.50 |
+| Acousticness closeness `× 0.50` | 0.0 – 0.50 |
+| Danceability closeness `× 0.25` | 0.0 – 0.25 |
+| **Maximum possible score** | **6.50** |
+
+All songs are then sorted by score (descending) and the top `k` are returned.
+
+### Data Flow
+
+```
+songs.csv ──▶ load_songs ──▶ score every song (loop) ──▶ sort descending ──▶ top K results
+                               ▲
+                          user_prefs dict
+```
+
+### Expected Biases
+
+- **Genre dominance:** At +2.0, a genre match outweighs all numeric signals combined in many cases. A song with a perfect energy, valence, and tempo match but a different genre will still lose to a mediocre same-genre song. This could bury cross-genre gems (e.g., a folk track that feels exactly like the user's target energy).
+- **Mood as a hard filter:** Mood is binary — no partial credit for adjacent moods like *focused* vs. *chill*. A focused listener will score *chill* songs the same as *aggressive* ones, even though focused and chill are far closer in spirit.
+- **Cold start gap:** The profile requires explicit target values for every feature. A real user who just says "I like Mumford & Sons" would need those values inferred — this system has no mechanism for that.
+- **Catalog skew:** The dataset of 17 songs has 3 lofi tracks but only 1 classical and 1 latin track. Genre-matched recommendations will be richer for lofi listeners than for latin listeners, purely due to catalog size.
 
 ---
 

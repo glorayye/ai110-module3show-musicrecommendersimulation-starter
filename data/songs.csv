@@ -9,3 +9,10 @@ id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
 8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
 9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
 10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
+11,Little Lion Man,Mumford & Sons,folk,emotional,0.78,148,0.42,0.52,0.74
+12,Deceivers,I Prevail,metalcore,aggressive,0.97,178,0.22,0.35,0.03
+13,Wagon Wheel,Old Crow Medicine Show,country,nostalgic,0.68,136,0.78,0.71,0.81
+14,Golden,Jill Scott,r&b,soulful,0.51,84,0.76,0.63,0.44
+15,Clair de Lune,Claude Debussy,classical,melancholic,0.18,58,0.62,0.22,0.98
+16,HUMBLE.,Kendrick Lamar,hip-hop,intense,0.85,150,0.44,0.80,0.06
+17,Pepas,Farruko,latin,triumphant,0.89,128,0.86,0.94,0.11
